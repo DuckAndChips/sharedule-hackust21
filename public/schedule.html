@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <meta charset='utf-8'/>
+    <link href='jq/jquery-ui.css' rel='stylesheet' />
+    <link href='fullcalendar/main.css' rel='stylesheet' />
+    <script src="jq/external/jquery/jquery.js"></script>
+    <script src='jq/jquery-ui.js'></script>
+    <script src='fullcalendar/main.js'></script>
+    <title>Family Schedule</title>
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // Calendar Initialization
+
+            var calendarEl = document.getElementById('calendar');
+
+            var startSelect, endSelect, currEvent;
+
+            const refetchInterval = 500;
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'timeGridWeek',
+                editable: true,
+                selectable: true,
+                nowIndicator: true,
+                navLinks: true,
+                customButtons: {
+                    backToMainMenu: {
+                        text: '↩',
+                        click: () => {
+                            window.location.replace("index.html");
+                        }
+                    },
+                    childLayout: {
+                        text: '🚼',
+                        click: () => {
+                            if(!$("body").attr("style")){
+                                $("body").
+                                attr("style",
+                                "background: url(\"childbg_schedule.jpeg\") no-repeat center center fixed; background-size: cover;");
+                            } else {
+                                $("body").removeAttr("style");
+                            }
+                        }
+                    }
+                },
+                headerToolbar: {
+                    left: 'backToMainMenu timeGridWeek dayGridMonth',
+                    center: 'title',
+                    right: 'childLayout'
+                },
+                eventSources:{ url: '/schedule/init', method: 'POST' },
+                // Add Event
+                select: function(selectInfo) {
+                    $("#add-dialog").dialog();
+                    startSelect = selectInfo.start;
+                    endSelect = selectInfo.end;
+                },
+                // Edit Event
+                eventClick: function(clickInfo) {
+                    clearInterval(refetching);
+                    currEvent = clickInfo.event;
+                    console.log(currEvent.extendedProps.colorLabel);
+                    console.log(currEvent.title);
+                    $("#edit-dialog-color").val(currEvent.extendedProps.colorLabel);
+                    $("#edit-dialog-name").val(currEvent.title);
+                    $("#edit-dialog").dialog();
+                },
+                // Move Event
+                eventDragStart: function(info){
+                    info.event.remove();
+                    clearInterval(refetching);
+                },
+                eventDrop: function(info) {
+                    let dropData = {
+                        start: info.event.start,
+                        end: info.event.end,
+                        extendedProps: { eid: info.event.extendedProps.eid }
+                    };
+                    fetch('/schedule/move-resize', {
+                        method: 'POST',
+                        body: JSON.stringify(dropData),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    console.log(dropData);
+                    var refetchInterval = window.setInterval(() => {
+                        calendar.refetchEvents()
+                    }, 5000);
+                },
+                // Resize Event
+                eventResizeStart: function(info){
+                    info.event.remove();
+                    clearInterval(refetching);
+                },
+                eventResize: function(info) {
+                    let resizeData = {
+                        start: info.event.start,
+                        end: info.event.end,
+                        extendedProps: { eid: info.event.extendedProps.eid }
+                    };
+                    fetch('/schedule/move-resize', {
+                        method: 'POST',
+                        body: JSON.stringify(resizeData),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    var refetchInterval = window.setInterval(() => {
+                        calendar.refetchEvents()
+                    }, 5000);
+                }
+            });
+
+            calendar.render();
+
+            var refetching = window.setInterval(() => {
+                calendar.refetchEvents()
+            }, refetchInterval);
+
+            // Button Actions
+
+            $("#add-dialog-confirm").click(
+                function(){
+                    let addData = {
+                        title: $("#add-dialog-name").val(),
+                        color: $("#add-dialog-color").val(),
+                        start: startSelect,
+                        end: endSelect,
+                        extendedProps: {
+                            colorLabel: $("#add-dialog-color").val()
+                        }
+                    };
+                    fetch('/schedule/add', {
+                        method: 'POST',
+                        body: JSON.stringify(addData),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then( (addResponse) => addResponse.json() )
+                    .then( (parsedResponse) => {
+                        console.log(parsedResponse);
+                        /*calendar.addEvent({
+                            title: $("#add-dialog-name").val(),
+                            color: $("#add-dialog-color").val(),
+                            start: startSelect,
+                            end: endSelect,
+                            extendedProps: {
+                                colorLabel: $("#add-dialog-color").val(),
+                                eid: parsedResponse.eid
+                            }
+                        });*/
+                    });
+                    calendar.refetchEvents();
+                    $("#add-dialog").dialog("close");
+                });
+
+            $("#edit-dialog-cancel").click(
+                function(){
+                    $("#edit-dialog").dialog("close");
+                });
+
+            $("#edit-dialog-confirm").click(
+                function(){
+                    /*currEvent.setProp("title", $("#edit-dialog-name").val());
+                    currEvent.setProp("color", $("#edit-dialog-color").val());
+                    currEvent.setExtendedProp("colorLabel", $("#edit-dialog-color").val());*/
+                    const editData= {
+                        title: $("#edit-dialog-name").val(),
+                        color: $("#edit-dialog-color").val(),
+                        extendedProps: {
+                            colorLabel: $("#edit-dialog-color").val(),
+                            eid: currEvent.extendedProps.eid
+                        }
+                    }
+                    fetch('/schedule/edit', {
+                        method: 'POST',
+                        body: JSON.stringify(editData),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    $("#edit-dialog").dialog("close");
+                    var refetching = window.setInterval(() => {
+                        calendar.refetchEvents()
+                    }, refetchInterval);
+                });
+
+
+            $("#edit-dialog-delete").click(
+                function(){
+                    currEvent.remove();
+                    $("#edit-dialog").dialog("close");
+                    const deleteData = { eid: currEvent.extendedProps.eid };
+                    fetch('/schedule/delete', {
+                        method: 'POST',
+                        body: JSON.stringify(deleteData),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                });
+
+
+
+        });
+
+
+    </script>
+    <style>
+        body {
+            margin: 50px 100px;
+            font-family: "arial", sans-serif;
+        }
+    </style>
+  </head>
+  <body>
+
+      <div id='calendar'></div>
+
+      <div id="add-dialog" title="Add Event" hidden>
+          <label for="add-dialog-name">Event:</label>
+          <input id="add-dialog-name" type="text"></input><br/><br/>
+          <label for="add-dialog-color">Color:</label>
+          <input id="add-dialog-color" type="text"></input><br/><br/>
+          <button id="add-dialog-confirm" type="button">Confirm</button>
+      </div>
+
+      <div autocomplete="off" id="edit-dialog" title="Edit Event"  hidden>
+          <label for="edit-dialog-name">Change event name to:</label>
+          <input autocomplete="off" id="edit-dialog-name" type="search" value=""></input><br/><br/>
+          <label for="edit-dialog-color">Change color to:</label>
+          <input autocomplete="off" id="edit-dialog-color" type="search" value=""></input><br/><br/>
+          <button id="edit-dialog-cancel" type="button">Cancel</button>
+          <button id="edit-dialog-confirm" type="button">Confirm</button>
+          <button id="edit-dialog-delete" type="button">Delete Event</button>
+          <input style="opacity: 0;position: absolute;" autocomplete="on" />
+      </div>
+
+      <center>
+          <p>Sharedule -- Hackust 2021</p>
+      </center>
+
+
+  </body>
+</html>
