@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <meta charset='utf-8'/>
+    <link href='jq/jquery-ui.css' rel='stylesheet' />
+    <link href='fullcalendar/main.css' rel='stylesheet' />
+    <script src="jq/external/jquery/jquery.js"></script>
+    <script src='jq/jquery-ui.js'></script>
+    <script src='fullcalendar/main.js'></script>
+    <title>Family Schedule</title>
+    <script src="schedule.js"></script>
+    <style>
+        body {
+            margin: 50px 100px;
+            font-family: "arial", sans-serif;
+        }
+    </style>
+  </head>
+  <body>
+
+      <div id='calendar'></div>
+
+      <div id="add-dialog" title="Add Event" hidden>
+          <label for="add-dialog-name">Event:</label>
+          <input id="add-dialog-name" type="text"></input><br/><br/>
+          <label for="add-dialog-color">Color:</label>
+          <input id="add-dialog-color" type="text"></input><br/><br/>
+          <button id="add-dialog-confirm" type="button">Confirm</button>
+      </div>
+
+      <div autocomplete="off" id="edit-dialog" title="Edit Event"  hidden>
+          <label for="edit-dialog-name">Change event name to:</label>
+          <input autocomplete="off" id="edit-dialog-name" type="search" value=""></input><br/><br/>
+          <label for="edit-dialog-color">Change color to:</label>
+          <input autocomplete="off" id="edit-dialog-color" type="search" value=""></input><br/><br/>
+          <button id="edit-dialog-cancel" type="button">Cancel</button>
+          <button id="edit-dialog-confirm" type="button">Confirm</button>
+          <button id="edit-dialog-delete" type="button">Delete Event</button>
+          <input style="opacity: 0;position: absolute;" autocomplete="on" />
+      </div>
+
+      <center>
+          <p>Sharedule -- Hackust 2021</p>
+      </center>
+
+
+  </body>
+</html>

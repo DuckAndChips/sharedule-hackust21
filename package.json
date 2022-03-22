@@ -4,13 +4,15 @@
   "description": "Sharedule",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js",
+    "start": "nodemon ./server/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Jaden Tse",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^16.0.0",
     "express": "^4.17.1",
+    "mongoose": "^6.2.7",
     "nedb": "^1.8.0",
     "nodemon": "^2.0.15",
     "uuid": "^8.3.2"
