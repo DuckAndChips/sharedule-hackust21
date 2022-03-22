@@ -1,7 +1,12 @@
 # Sharedule
-Sharedule is a web application that hybridizes a shared calendar and a shared to-do list for a family.
+Sharedule is a web application that hybridizes a shared calendar and a shared to-do list for a family. It is an attempt to help women in balancing their responsibilities in the family.
 
-**Libraries/Framework used**: `jQuery`, `jQuery-UI` for more flexible dialogs, `Node.js` and `Express.js` as the backend framework, `FullCalendar` (https://fullcalendar.io/) for calendar systems, `mongoDB` for the database and `Bootstrap` as the UI framework.
+---
+
+### Tech Stack
+- **Frontend**: `jQuery`, `jQuery-UI` for easier UI control and dialogs, `FullCalendar` (https://fullcalendar.io/) for calendar systems,  and `Bootstrap` for UI components.
+- **Backend**: `Node.js`, `Express.js` and `mongoose`
+- **Database**: `mongoDB` Atlas
 
 ---
 
