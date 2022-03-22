@@ -4,7 +4,7 @@ Sharedule is a web application that hybridizes a shared calendar and a shared to
 ---
 
 ### Tech Stack
-- **Frontend**: `jQuery`, `jQuery-UI` for easier UI control and dialogs, `FullCalendar` (https://fullcalendar.io/) for calendar systems,  and `Bootstrap` for UI components.
+- **Frontend**: `jQuery`, `jQuery-UI`, `FullCalendar` (https://fullcalendar.io/) and `Bootstrap`
 - **Backend**: `Node.js`, `Express.js` and `mongoose`
 - **Database**: `mongoDB` Atlas
 
